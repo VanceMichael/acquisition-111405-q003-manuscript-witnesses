@@ -1,0 +1,290 @@
+[
+  {
+    "name": "readings",
+    "routes": [
+      {
+        "path": "/edition",
+        "body": {
+          "volumes": [
+            "/vol/a",
+            "/vol/b"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/vol/a",
+        "body": {
+          "scope": "A",
+          "witnesses": {
+            "w1": {
+              "kind": "person"
+            },
+            "g": {
+              "kind": "group",
+              "members": [
+                "w1",
+                {
+                  "scope": "B",
+                  "id": "w1"
+                }
+              ]
+            }
+          },
+          "fragments": [
+            "/fragment/a"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/vol/b",
+        "body": {
+          "scope": "B",
+          "witnesses": {
+            "w1": {
+              "kind": "person"
+            }
+          },
+          "fragments": []
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/fragment/a",
+        "body": "<p xml:id=\"p1\">山<app xml:id=\"a1\"><lem wit=\"#w1\">川</lem><rdg wit=\"#g\">河</rdg></app><gap reason=\"lost\" extent=\"2\"/></p>",
+        "status": 200,
+        "method": "GET"
+      }
+    ],
+    "expected": [
+      {
+        "scope": "A",
+        "fragment": "p1",
+        "readings": [
+          {
+            "kind": "lem",
+            "text": "川",
+            "witnesses": [
+              "A/w1"
+            ]
+          },
+          {
+            "kind": "rdg",
+            "text": "河",
+            "witnesses": [
+              "A/w1",
+              "B/w1"
+            ]
+          }
+        ]
+      }
+    ],
+    "forbidden": []
+  },
+  {
+    "name": "witness-cycle",
+    "routes": [
+      {
+        "path": "/edition",
+        "body": {
+          "volumes": [
+            "/vol/a"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/vol/a",
+        "body": {
+          "scope": "A",
+          "witnesses": {
+            "g": {
+              "kind": "group",
+              "members": [
+                "g"
+              ]
+            }
+          },
+          "fragments": [
+            "/fragment/a"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/fragment/a",
+        "body": "<p xml:id=\"p2\"><app xml:id=\"a2\"><rdg wit=\"#g\">河</rdg></app></p>",
+        "status": 200,
+        "method": "GET"
+      }
+    ],
+    "expected": [
+      {
+        "scope": "A",
+        "fragment": "p2",
+        "readings": [
+          {
+            "text": "河",
+            "unresolved": true
+          }
+        ]
+      }
+    ],
+    "forbidden": []
+  },
+  {
+    "name": "plain-segments",
+    "routes": [
+      {
+        "path": "/edition",
+        "body": {
+          "volumes": [
+            "/vol/a",
+            "/vol/b"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/vol/a",
+        "body": {
+          "scope": "A",
+          "witnesses": {
+            "w1": {
+              "kind": "person"
+            },
+            "g": {
+              "kind": "group",
+              "members": [
+                "w1",
+                {
+                  "scope": "B",
+                  "id": "w1"
+                }
+              ]
+            }
+          },
+          "fragments": [
+            "/fragment/a"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/vol/b",
+        "body": {
+          "scope": "B",
+          "witnesses": {
+            "w1": {
+              "kind": "person"
+            }
+          },
+          "fragments": []
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/fragment/a",
+        "body": "<p xml:id=\"p3\">山川</p>",
+        "status": 200,
+        "method": "GET"
+      }
+    ],
+    "expected": [
+      {
+        "scope": "A",
+        "fragment": "p3",
+        "segments": [
+          {
+            "text": "山川"
+          }
+        ]
+      }
+    ],
+    "forbidden": []
+  },
+  {
+    "name": "gap-is-not-text",
+    "routes": [
+      {
+        "path": "/edition",
+        "body": {
+          "volumes": [
+            "/vol/a",
+            "/vol/b"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/vol/a",
+        "body": {
+          "scope": "A",
+          "witnesses": {
+            "w1": {
+              "kind": "person"
+            },
+            "g": {
+              "kind": "group",
+              "members": [
+                "w1",
+                {
+                  "scope": "B",
+                  "id": "w1"
+                }
+              ]
+            }
+          },
+          "fragments": [
+            "/fragment/a"
+          ]
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/vol/b",
+        "body": {
+          "scope": "B",
+          "witnesses": {
+            "w1": {
+              "kind": "person"
+            }
+          },
+          "fragments": []
+        },
+        "status": 200,
+        "method": "GET"
+      },
+      {
+        "path": "/fragment/a",
+        "body": "<p xml:id=\"p4\">山<gap reason=\"lost\" extent=\"2\"/>川</p>",
+        "status": 200,
+        "method": "GET"
+      }
+    ],
+    "expected": [
+      {
+        "scope": "A",
+        "fragment": "p4",
+        "gaps": [
+          {
+            "reason": "lost",
+            "extent": "2"
+          }
+        ]
+      }
+    ],
+    "forbidden": []
+  }
+]
